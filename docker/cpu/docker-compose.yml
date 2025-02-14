@@ -1,6 +1,6 @@
-name: kokoro-fastapi-cpu
+name: kokoro-tts
 services:
-image: ghcr.io/remsky/kokoro-fastapi-cpu:v0.2.1
+# image: ghcr.io/remsky/kokoro-fastapi-cpu:v0.2.1
   kokoro-tts:
     build:
       context: ../..
