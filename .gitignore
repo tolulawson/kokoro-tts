@@ -49,12 +49,12 @@ app
 api/temp_files/
 
 # Docker
-Dockerfile*
-docker-compose*
+# Dockerfile*
+# docker-compose*
 examples/ebook_test/chapter_to_audio.py
 examples/ebook_test/chapters_to_audio.py
 examples/ebook_test/parse_epub.py
-api/src/voices/af_jadzia.pt
+# api/src/voices/af_jadzia.pt
 examples/assorted_checks/test_combinations/output/*
 examples/assorted_checks/test_openai/output/*
 
