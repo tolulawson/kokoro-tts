@@ -21,7 +21,7 @@ echo "📦 Building and starting Docker containers..."
 
 # Navigate to CPU docker directory and start services
 cd docker/cpu
-docker compose up --build -d
+docker-compose up --build -d
 
 # Check if containers started successfully
 if [ $? -eq 0 ]; then
