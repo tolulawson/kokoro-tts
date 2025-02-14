@@ -11,8 +11,12 @@ if ! command -v docker &> /dev/null; then
     exit 1
 fi
 
-# Check if Docker Compose is installed
-if ! command -v docker compose &> /dev/null; then
+# Check for docker compose command (either version)
+if command -v docker-compose &> /dev/null; then
+    DOCKER_COMPOSE="docker-compose"
+elif command -v docker &> /dev/null && docker compose version &> /dev/null; then
+    DOCKER_COMPOSE="docker compose"
+else
     echo "❌ Docker Compose is not installed. Please install Docker Compose first."
     exit 1
 fi
@@ -21,7 +25,7 @@ echo "📦 Building and starting Docker containers..."
 
 # Navigate to CPU docker directory and start services
 cd docker/cpu
-docker-compose up --build -d
+$DOCKER_COMPOSE up --build -d
 
 # Check if containers started successfully
 if [ $? -eq 0 ]; then
@@ -35,5 +39,5 @@ else
 fi
 
 # Print how to view logs
-echo -e "\n💡 To view logs, run: docker compose -f docker/cpu/docker-compose.yml logs -f"
-echo "💡 To stop the service, run: docker compose -f docker/cpu/docker-compose.yml down" 
+echo -e "\n💡 To view logs, run: $DOCKER_COMPOSE logs -f"
+echo "💡 To stop the service, run: $DOCKER_COMPOSE down" 
