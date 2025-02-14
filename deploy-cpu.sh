@@ -21,6 +21,10 @@ else
     exit 1
 fi
 
+# Enable BuildKit
+export DOCKER_BUILDKIT=1
+export COMPOSE_DOCKER_CLI_BUILD=1
+
 echo "📦 Building and starting Docker containers..."
 
 # Navigate to CPU docker directory and start services
