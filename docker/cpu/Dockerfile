@@ -49,7 +49,9 @@ ENV PYTHONUNBUFFERED=1 \
     USE_GPU=false \
     PHONEMIZER_ESPEAK_PATH=/usr/bin \
     PHONEMIZER_ESPEAK_DATA=/usr/share/espeak-ng-data \
-    ESPEAK_DATA_PATH=/usr/share/espeak-ng-data
+    ESPEAK_DATA_PATH=/usr/share/espeak-ng-data \
+    UNLOAD_MODEL_AFTER_IDLE=true \
+    IDLE_TIMEOUT_SECONDS=300
 
 ENV DOWNLOAD_MODEL=true
 # Download model if enabled
