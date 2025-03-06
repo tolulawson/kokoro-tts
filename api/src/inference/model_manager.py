@@ -1,9 +1,6 @@
 """Kokoro V1 model management."""
 
 from typing import Optional
-import time
-import os
-import asyncio
 
 from loguru import logger
 
@@ -29,18 +26,6 @@ class ModelManager:
         self._config = config or model_config
         self._backend: Optional[KokoroV1] = None  # Explicitly type as KokoroV1
         self._device: Optional[str] = None
-        self._last_activity_time = time.time()
-        self._idle_check_task = None
-        
-        # Get environment variables for idle timeout
-        self._unload_model_after_idle = os.environ.get("UNLOAD_MODEL_AFTER_IDLE", "false").lower() == "true"
-        try:
-            self._idle_timeout_seconds = int(os.environ.get("IDLE_TIMEOUT_SECONDS", "300"))
-        except ValueError:
-            self._idle_timeout_seconds = 300
-            logger.warning("Invalid IDLE_TIMEOUT_SECONDS value, using default of 300 seconds")
-        
-        logger.info(f"Model unloading after idle: {self._unload_model_after_idle} (timeout: {self._idle_timeout_seconds}s)")
 
     def _determine_device(self) -> str:
         """Determine device based on settings."""
@@ -52,7 +37,6 @@ class ModelManager:
             self._device = self._determine_device()
             logger.info(f"Initializing Kokoro V1 on {self._device}")
             self._backend = KokoroV1()
-            await self._start_idle_check()
         except Exception as e:
             raise RuntimeError(f"Failed to initialize Kokoro V1: {e}")
 
@@ -151,14 +135,6 @@ Model files not found! You need to download the Kokoro V1 model:
         Raises:
             RuntimeError: If generation fails
         """
-        self._update_activity_timestamp()
-        
-        # Reload model if it was unloaded due to inactivity
-        if self._backend is None or not self._backend.is_loaded:
-            logger.info("Model was unloaded, reloading...")
-            await self.initialize()
-            model_path = self._config.pytorch_kokoro_v1_file
-            await self.load_model(model_path)
         
         if not self._backend:
             raise RuntimeError("Backend not initialized")
@@ -179,29 +155,6 @@ Model files not found! You need to download the Kokoro V1 model:
     def current_backend(self) -> str:
         """Get current backend type."""
         return "kokoro_v1"
-
-    async def _start_idle_check(self):
-        """Start background task to check for idle status and unload model if needed."""
-        if self._idle_check_task is not None:
-            self._idle_check_task.cancel()
-        
-        if not self._unload_model_after_idle:
-            return
-        
-        async def check_idle():
-            while True:
-                await asyncio.sleep(60)  # Check every minute
-                if self._backend and self._backend.is_loaded:
-                    idle_time = time.time() - self._last_activity_time
-                    if idle_time > self._idle_timeout_seconds:
-                        logger.info(f"Model idle for {idle_time:.1f}s, unloading to free memory")
-                        self.unload_all()
-                    
-        self._idle_check_task = asyncio.create_task(check_idle())
-    
-    def _update_activity_timestamp(self):
-        """Update the last activity timestamp."""
-        self._last_activity_time = time.time()
 
 
 async def get_manager(config: Optional[ModelConfig] = None) -> ModelManager:
